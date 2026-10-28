@@ -6,8 +6,8 @@
 
 GitHub Pages · Windows · macOS · Linux · Автосохранение · JSON-копии · Экспорт в HOI4
 
-**Полная поставка:** [Как загрузить на GitHub и оформить Releases](GITHUB_PUBLISHING.md) · [Готовые сборки для всех ОС](release-files/)
-
+**Полная поставка:** [Готовые сборки для всех ОС](release-files/)
+**Сайт** https://dayiop.github.io/Hoi-4-Focus-Studio/
 </div>
 
 ## 🗺️ Что это за проект
