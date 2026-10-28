@@ -87,18 +87,6 @@ sudo apt install ./HOI4-Focus-Studio-linux-amd64.deb
 
 Это отдельный профиль Edge для редактора, а не папка установки. Повторная установка сохраняет проекты, если профиль не был удалён.
 
-## 🌐 Публикация на GitHub Pages
-
-1. Загрузи **содержимое этого репозитория** на GitHub. Убедись, что `index.html` лежит в корне.
-2. Перейди в **Settings → Pages → Build and deployment**.
-3. Выбери **Deploy from a branch**, ветку **main**, папку **/(root)**.
-4. Сохрани настройки. Сайт будет доступен по адресу вида `https://USERNAME.github.io/REPOSITORY/`.
-
-Репозиторий с именем `USERNAME.github.io` открывается по адресу `https://USERNAME.github.io/`.
-
-Файлы `sw.js`, `manifest.webmanifest` и `icon.svg` отвечают за PWA/офлайн-режим и оформление. Сайт может открываться без сети после первого посещения, если браузер установил offline-кэш.
-
-> GitHub Pages — **статический хостинг**. Файлы проектов пользователей НЕ записываются в репозиторий и НЕ синхронизируются с GitHub.
 
 ## ✨ Возможности редактора
 
@@ -139,56 +127,6 @@ sudo apt install ./HOI4-Focus-Studio-linux-amd64.deb
 | `Ctrl+Y` | Повторить изменение |
 | `Delete` | Удалить выбранный фокус |
 | `Esc` | Выйти из режима создания связи |
-
-## 🛠️ Сборка приложений из исходников
-
-Требуется **Go 1.23+**. Общий код настольной версии находится в `desktop-src/`; код Windows-установщика — в `windows-src/installer/`. Дополнительные Go-зависимости не требуются.
-
-Windows PowerShell:
-
-```powershell
-cd desktop-src
-go build -trimpath -ldflags="-H windowsgui -s -w" -o ../../HOI4-Focus-Studio.exe .
-cd ../windows-src/installer
-New-Item -ItemType Directory -Force payload | Out-Null
-Copy-Item ../../HOI4-Focus-Studio.exe payload/HOI4-Focus-Studio.exe
-go build -trimpath -ldflags="-H windowsgui -s -w" -o ../../HOI4-Focus-Studio-Setup.exe .
-```
-
-На Linux (требуется `dpkg-deb` и `zip`), можно пересобрать все Linux-пакеты:
-
-```bash
-bash scripts/build-linux.sh
-```
-
-На Linux и macOS можно кросс-компилировать универсальный macOS `.app` в ZIP:
-
-```bash
-bash scripts/build-macos.sh
-```
-
-Подпись `.app` командой `codesign` и создание `.dmg` возможны **только на macOS**. Для неподписанного ZIP, собранного на Linux, macOS может запросить дополнительное разрешение.
-
-В GitHub Actions доступны workflows:
-
-- `.github/workflows/build-windows.yml` — Windows EXE и установщик;
-- `.github/workflows/build-macos-linux.yml` — macOS `.app` ZIP и `.dmg`, Linux `.deb` и portable `.tar.gz` для amd64/arm64.
-
-Запусти их вручную через **Actions → Run workflow** либо создай тег `v*`. Готовые пакеты скачиваются в **Artifacts** соответствующего прогона. В этой полной поставке готовые бинарники также включены в `release-files/`. Публиковать их внутри коммитов необязательно: после создания GitHub Release можно хранить их только в Releases.
-
-## ❓ Частые вопросы
-
-**Программа требует Steam или установленную HOI4?** Нет, но для работы с игровыми файлами и проверки мода понадобится сама игра.
-
-**Проекты будут доступны по ссылке сайта другим людям?** Нет. У каждого пользователя своё локальное хранилище браузера.
-
-**Можно ли редактировать на телефоне?** Да, в браузерной версии. Настольные пакеты предназначены для компьютеров.
-
-**Почему после установки ничего не появилось в репозитории?** GitHub Pages не является системой облачных сохранений. Используй JSON для обмена проектами.
-
-**Это Electron?** Нет. Настольные сборки — небольшие исполняемые файлы на Go с локальным сервером, использующие установленный браузер (его собственное окно в режиме приложения, если это Chromium-браузер). Браузерный движок внутрь пакетов не встроен.
-
----
 
 *HOI4 Focus Studio — неофициальный фанатский инструмент. Не связан с Paradox Interactive.*
 
