@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HOI4 Focus Studio — редактор фокусов</title>
+<meta name="theme-color" content="#151b20">
+<meta name="description" content="Бесплатный редактор деревьев национальных фокусов Hearts of Iron IV: проекты, сохранения, связи и экспорт.">
+<link rel="icon" type="image/svg+xml" href="./icon.svg">
+<link rel="manifest" href="./manifest.webmanifest">
+<style>
+:root{color-scheme:dark;--bg:#14181b;--pn:#1d2226;--ln:#3a4248;--tx:#e6e2d3;--mu:#8d9499;--gd:#c9b26b;--rd:#c0463a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:13px system-ui,Segoe UI,sans-serif;display:flex;flex-direction:column}
+.bar{display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:var(--pn);border-bottom:1px solid var(--ln);align-items:center}
+button,.btn{background:#2a3238;color:var(--tx);border:1px solid #4a545b;padding:6px 10px;border-radius:3px;cursor:pointer;font:inherit}
+button:hover,.btn:hover{border-color:var(--gd)}
+input,textarea{background:#101315;color:var(--tx);border:1px solid var(--ln);border-radius:3px;padding:5px;font:inherit;width:100%;box-sizing:border-box}
+main{flex:1;display:flex;min-height:0}
+#cv{flex:1;overflow:auto;background:radial-gradient(#2b3338 1px,transparent 1px) 0 0/26px 26px,#1a2024}
+#world{position:relative;min-width:100%}
+#ln{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.f{position:absolute;width:88px;cursor:grab;touch-action:none;user-select:none}
+.ic{width:80px;height:80px;margin:0 4px;background:#0e1114 center/100% 100% no-repeat;border:2px solid #8f8250;box-shadow:inset 0 0 0 2px #000,0 0 0 1px #000,0 3px 8px #000a}
+.lab{margin-top:4px;background:#0b0d0fd9;border:1px solid #4a4f52;font-size:11px;padding:2px 3px;text-align:center;line-height:1.2;overflow:hidden;max-height:28px}
+.f.sel .ic{border-color:#ffe27a;box-shadow:inset 0 0 0 2px #000,0 0 0 2px #ffe27a}
+#side{width:310px;overflow:auto;background:var(--pn);border-left:1px solid var(--ln);padding:10px;box-sizing:border-box}
+#side label{display:block;margin:7px 0 2px;color:var(--mu);font-size:11px}
+.r2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+#ig{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:6px}
+#ig div{aspect-ratio:1;background:#0e1114 center/cover;border:1px solid var(--ln);cursor:pointer}
+#ig div:hover{border-color:var(--gd)}
+#out{display:none;position:fixed;inset:0;background:#000c;z-index:9;padding:20px;box-sizing:border-box;flex-direction:column;gap:8px}
+#out textarea{flex:1;font:12px monospace;white-space:pre}
+.hint{color:var(--mu);font-size:11px;margin-top:4px}
+@media(max-width:800px){main{flex-direction:column}#side{width:auto;height:46%;border-left:0;border-top:1px solid var(--ln)}}
+:root{--bg:#0c1013;--pn:#151b20;--ln:#2e3a43;--tx:#ece7d6;--mu:#87929a;--gd:#d6b96a}
+body{background:var(--bg);font:13px/1.35 'Segoe UI',system-ui,sans-serif}
+.bar{gap:8px;padding:8px 12px;background:linear-gradient(#1c242a,#12181c);border-bottom:2px solid #5d5232;box-shadow:0 2px 12px #000a;position:relative;z-index:2}
+.ttl{letter-spacing:.14em;text-transform:uppercase;color:var(--gd);font-size:14px;margin-right:8px}.ttl i{font-style:normal;color:var(--tx);font-weight:400}
+button,.btn,select{background:linear-gradient(#2c363d,#1f282e);color:var(--tx);border:1px solid #44525c;border-radius:2px;padding:6px 12px;font-size:12px;text-align:center;max-width:220px}
+button:hover,.btn:hover{border-color:var(--gd);color:#fff}
+.pri{border-color:#8f7d41;color:var(--gd);font-weight:700}
+input:focus,textarea:focus,select:focus{outline:0;border-color:var(--gd);box-shadow:0 0 0 1px #d6b96a55}
+#cv{background:radial-gradient(#ffffff10 1px,transparent 1.5px) 0 0/26px 26px local,radial-gradient(ellipse at 50% 0,#1d262c,#0c1013 75%)}
+#ln{filter:drop-shadow(0 1px 1px #000)}
+.ic{width:84px;height:84px;margin:0 2px;box-sizing:border-box;border:2px solid #cdb36a;border-radius:3px;background-color:#10161a;box-shadow:inset 0 0 0 2px #050708,inset 0 0 0 3px #5e5430,0 5px 12px #000b;position:relative}
+.ic:not(.has)::after{content:'?';position:absolute;inset:0;display:grid;place-items:center;font-size:34px;color:#4a5a66}
+.f:hover .ic{filter:brightness(1.18)}
+.f.sel .ic{border-color:#ffe48a;box-shadow:inset 0 0 0 2px #050708,0 0 0 2px #ffe48a,0 0 18px #ffd96666}
+.lab{height:30px;box-sizing:border-box;margin-top:4px;display:flex;align-items:center;justify-content:center;overflow:hidden;max-height:none;background:linear-gradient(#242d33,#12181c);border:1px solid #6a5f3a;border-radius:2px;color:#f4efdf;font-weight:600;font-size:11px;line-height:1.15;padding:1px 3px;text-shadow:0 1px 1px #000}
+.cs{position:absolute;top:-6px;right:-2px;min-width:20px;padding:1px 4px;background:#0a0d0f;border:1px solid #8f7d41;color:var(--gd);font-size:10px;font-weight:700;text-align:center;border-radius:9px}
+#side{width:320px;background:var(--pn);border-left:2px solid #3a3322}
+#side label{text-transform:uppercase;letter-spacing:.06em;font-size:10px;margin-top:10px}
+input,textarea{background:#0b0f12}
+#ig div{border-color:#33414b;background-color:#0b0f12}
+.empty{position:absolute;left:40px;top:40px;color:var(--mu);line-height:1.7;white-space:nowrap;pointer-events:none}
+#tin{display:none;position:fixed;inset:0;background:#000d;z-index:9;padding:20px;box-sizing:border-box;flex-direction:column;gap:8px}#tin textarea{flex:1;font:12px monospace;white-space:pre}
+.pt,.px{position:absolute;width:16px;height:16px;margin-left:-8px;border-radius:50%;border:2px solid #fff;box-sizing:border-box;cursor:crosshair;opacity:0;transition:.1s;touch-action:none}
+.pt{left:50%;bottom:-9px;background:#a855f7}.px{left:calc(100% - 1px);top:34px;background:#c0463a}
+.f:hover .pt,.f:hover .px,.f.sel .pt,.f.sel .px{opacity:1}
+
+.save-state{font-size:11px;color:#b2c6ad;min-width:90px}.save-state.err{color:#ff9a88}
+.sidehead{display:flex;justify-content:space-between;border-bottom:1px solid var(--ln);padding-bottom:10px;color:var(--gd);font-size:11px;letter-spacing:.06em}.sidehead span{color:var(--mu)}
+.overlay{position:fixed;inset:0;background:#05080bdc;z-index:20;display:none;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;backdrop-filter:blur(5px)}
+.overlay.open{display:flex}.project-modal{background:linear-gradient(155deg,#202a31,#12181d);border:1px solid #78673f;box-shadow:0 24px 90px #000c;border-radius:8px;max-width:940px;width:100%;max-height:90vh;overflow:auto;padding:22px;box-sizing:border-box}
+.project-modal header{display:flex;justify-content:space-between;align-items:start;gap:20px;border-bottom:1px solid #35424a;padding-bottom:13px}.project-modal h2{margin:0;color:#e7cb79;font-size:22px;letter-spacing:.03em}.project-modal h3{color:#d9c58a;margin:18px 0 10px}.project-modal p{color:#9daaaf;font-size:12px}.project-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:16px}.project-modal label{display:block;color:#b8c0bf;margin:10px 0 6px}.project-actions{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.project-actions .btn{cursor:pointer}.project-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;background:#0d1418;border:1px solid #344047;margin-top:6px;cursor:pointer;border-radius:4px}.project-item.active{border-color:var(--gd);background:#232719}.project-item small{color:#88969c}.project-item strong{display:block;overflow-wrap:anywhere}.muted{color:var(--mu)}#plist,#snaplist{max-height:250px;overflow:auto}#toast{position:fixed;z-index:40;bottom:20px;left:50%;transform:translateX(-50%);background:#23322c;color:#e9f5e9;padding:10px 18px;border:1px solid #799576;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .2s}#toast.show{opacity:1}
+@media(max-width:700px){.project-grid{grid-template-columns:1fr}.project-modal{padding:14px}.bar{gap:5px}.save-state{min-width:0}}
+
+:root{--gd:#dfc477}body{font-size:13px}
+.bar{padding:10px 14px;gap:7px;align-items:center}.bar .ttl{font-size:15px;margin-right:16px}
+.bar button,.bar .btn{white-space:nowrap}.bar button,.bar .btn,.bar select{min-height:31px}
+.bar #saveState{margin-left:auto;white-space:nowrap;font-weight:600}
+button:focus-visible,.btn:focus-visible{outline:2px solid #f0d078;outline-offset:2px}
+#cv{min-height:280px}#side{width:342px;padding:16px}
+#side textarea{min-height:74px;resize:vertical}.project-modal{max-width:990px}
+#out{padding:4vw 6vw;background:#05080cea}#out textarea{border:1px solid #645732;border-radius:5px;padding:14px}
+#out>div:last-child{display:flex;flex-wrap:wrap;gap:8px}
+#world .empty{white-space:normal;max-width:270px;background:#0c151bc7;padding:16px;border:1px dashed #76663b;border-radius:6px}
+#focusSearch{background:#111a1e}#countryTag{text-align:center;font-weight:700;color:#e5cd81}
+.f.search-dim{opacity:.23}.f.search-match .lab{border-color:#ffe58a;background:#403922}
+@media(max-width:1000px){#side{width:305px}.bar #saveState{margin-left:0}}
+@media(max-width:800px){#side{width:100%;height:47%;min-height:240px;border-top:2px solid #3a3322;border-left:0}main{flex-direction:column}#cv{min-height:180px}.bar .ttl{width:100%;margin:0}}
+@media(max-width:480px){.bar{padding:8px}.bar button,.bar .btn{padding:5px 8px}.project-modal h2{font-size:18px}.project-grid{gap:8px}}
+</style></head><body>
+<div class="bar">
+ <b class="ttl">HOI4 <i>Focus Studio</i></b><button id="add" class="pri">+ Фокус</button><button id="del">Удалить</button><button id="undo" title="Ctrl+Z">↶</button><button id="redo" title="Ctrl+Y">↷</button><button id="txt">Из текста</button>
+ <label class="btn">Импорт фокусов / goals.gfx<input id="imp" type="file" multiple accept=".txt,.gfx" hidden></label>
+ <label class="btn">Папка иконок игры<input id="fold" type="file" webkitdirectory multiple hidden></label>
+ <button id="projects" class="pri">☷ Проекты и сохранения</button><button id="quickBackup" title="Скачать резервную копию проекта JSON">↓ JSON-копия</button><span id="saveState" class="save-state" aria-live="polite">Загрузка…</span><button data-x="hoi">Экспорт HOI4</button><button data-x="ai">Экспорт для нейронки</button><button data-x="loc">Локализация</button>
+ <select id="ts" title="Ветка"></select><input id="tree" style="width:150px" title="id ветки" aria-label="ID дерева"><input id="focusSearch" style="width:145px" placeholder="⌕ Найти фокус" title="Поиск по названию или ID"><input id="countryTag" style="width:68px;text-transform:uppercase" placeholder="TAG" maxlength="3" title="Трёхбуквенный тег страны для экспорта HOI4" aria-label="Тег страны">
+</div>
+<main><div id="cv"><div id="world"></div></div>
+<div id="side">
+ <div class="sidehead"><b>РЕДАКТОР ФОКУСОВ</b><span id="stats">0 фокусов</span></div><div class="hint" style="margin-top:8px">Сайт работает локально в браузере. Изменения сохраняются автоматически. Для переноса на другой компьютер скачай JSON.</div>
+ <div id="form">
+  <label>id фокуса</label><input data-k="id">
+  <label>Название</label><input data-k="name">
+  <label>Описание</label><textarea data-k="desc" rows="2"></textarea>
+  <div class="r2"><div><label>x</label><input data-k="x" type="number"></div><div><label>y</label><input data-k="y" type="number"></div><div><label>Дни</label><input data-k="cost" type="number"></div></div>
+  <label>Связать с другим фокусом</label><div class="r2"><button id="bp" title="Выбранный фокус идёт после того, на кого кликнешь">После… (И)</button><button id="bo" title="Достаточно одного из родителей">После… (ИЛИ)</button><button id="bx" title="Взаимоисключающие фокусы">Выбор ⇄</button></div><div class="hint" id="mh"></div>
+  <label>Требует (A|B = ИЛИ, запятая = И)</label><input data-k="pre">
+  <label>Взаимоисключает</label><input data-k="ex">
+  <label>Иконка (GFX_...)</label><input data-k="icon">
+  <label class="btn" style="display:block;margin-top:8px;text-align:center">Своя картинка<input id="own" type="file" accept="image/*" hidden></label>
+  <input id="isq" placeholder="Поиск иконки игры..." style="margin-top:8px">
+  <div id="ig"></div>
+  <div class="hint" id="ih">Загрузи «Папку иконок игры» (gfx/interface/goals) и goals.gfx — тогда здесь появятся иконки.</div>
+ </div>
+ <div class="hint" id="none">Выбери фокус или нажми «+ Фокус». Перетаскивай фокусы мышью.</div>
+</div></main>
+<div id="tin"><div>Вставь схему текстом: названия фокусов, <b>|</b> между ними, линии <b>———</b> для разветвлений. Можно добавить строку «(возьми из НАЗВАНИЕ)».</div><textarea id="ti" placeholder="Ветка фокусов ..."></textarea><label><input id="ex" type="checkbox" checked style="width:auto"> Ответвления взаимоисключающие</label><div><button class="pri" id="mk">Создать ветку</button> <button id="tc">Закрыть</button></div></div>
+<div id="pm" class="overlay" aria-hidden="true"><section class="project-modal"><header><div><h2>Проекты и сохранения</h2><p>Работай с несколькими деревьями, сохраняй версии и переносите проекты между устройствами.</p></div><button id="pmclose">✕</button></header>
+<div class="project-grid"><div><label>Название проекта</label><input id="pname" placeholder="Мой HOI4 мод"><label>Проекты на этом устройстве</label><div id="plist"></div><div class="project-actions"><button id="pnew" class="pri">+ Новый проект</button><button id="pduplicate">Дублировать</button><button id="pdelete">Удалить проект</button></div></div>
+<div><h3>Резервные копии</h3><p>Автосохранение работает только в этом браузере на GitHub Pages. Для переноса на другое устройство скачай JSON-копию. GitHub не хранит пользовательские проекты автоматически.</p><div class="project-actions"><button id="psave" class="pri">Сохранить сейчас</button><button id="pdownload">↓ Скачать JSON</button><label class="btn">↑ Открыть JSON<input type="file" id="pupload" accept=".json,application/json" hidden></label></div><h3>История версий</h3><div class="project-actions"><button id="psnapshot">+ Создать версию</button></div><div id="snaplist"></div><p class="muted">Ctrl+S — сохранить копию · Ctrl+Z / Ctrl+Y — отмена / повтор · Delete — удалить выбранный фокус.</p></div></div></section></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="out"><textarea id="ot" readonly></textarea><div><button id="cp">Копировать</button> <button id="exportFile" class="pri">↓ Скачать файл</button> <button id="cl">Закрыть</button></div></div>
+<script>
+const CW=104,CH=150,PX=40,PY=30,$=s=>document.querySelector(s);
+const mk=(tree,all)=>({tree,all,get f(){return this.all[this.tree]||(this.all[this.tree]=[])},set f(v){this.all[this.tree]=v},toJSON(){return{tree:this.tree,all:this.all}}});
+let S=mk('MY_FOCUS_TREE',{}),sel=null;
+try{const r=JSON.parse(localStorage.getItem('hoi4fs2')||'null');if(r&&r.all)S=mk(r.tree,r.all)}catch(e){}
+let save=()=>{try{localStorage.setItem('hoi4fs2',JSON.stringify(S));const status=$('#saveState');if(status){status.textContent='● Сохранено';status.classList.remove('err')}}catch(e){const status=$('#saveState');if(status){status.textContent='⚠ Скачай JSON';status.classList.add('err')}}};
+const files=new Map(),gfx=new Map(),cache=new Map();
+const q=s=>typeof s=='string'?s.replace(/^"|"$/g,''):'';
+const base=p=>q(p).split('/').pop().replace(/\.\w+$/,'').toLowerCase();
+const g=(b,k)=>{const e=b.find(x=>x[0]==k);return e&&e[1]},all=(b,k)=>b.filter(x=>x[0]==k).map(x=>x[1]);
+const tok=s=>s.replace(/#.*$/gm,'').match(/"[^"]*"|[{}=]|[^\s{}=]+/g)||[];
+function parse(t){let i=0;function blk(){const o=[];while(i<t.length&&t[i]!='}'){const k=t[i++];if(t[i]=='='){i++;if(t[i]=='{'){i++;o.push([k,blk()]);i++}else o.push([k,t[i++]])}else o.push([null,k])}return o}return blk()}
+function walk(b){for(const[k,v]of b){if(k=='spriteType'&&Array.isArray(v)){const n=g(v,'name'),t=g(v,'texturefile');if(n&&t)gfx.set(q(n),base(t))}else if(Array.isArray(v))walk(v)}}
+function addF(b,arr){const id=q(g(b,'id'));if(!id)return;const ic=g(b,'icon');
+ const f={id,name:'',desc:'',icon:typeof ic=='string'?q(ic):'',img:'',x:+g(b,'x')||0,y:+g(b,'y')||0,cost:+g(b,'cost')||10,
+  pre:all(b,'prerequisite').map(p=>all(p,'focus').map(q).join('|')).join(', '),
+  ex:all(b,'mutually_exclusive').flatMap(m=>all(m,'focus').map(q)).join(', '),rel:q(g(b,'relative_position_id'))};
+ const i=arr.findIndex(o=>o.id==id);i<0?arr.push(f):arr[i]=f}
+function importText(txt,name){
+ const b=parse(tok(txt)),got=new Set();
+ if(/\.gfx$/i.test(name)){walk(b);return}
+ for(const[k,v]of b){if(!Array.isArray(v))continue;
+  if(k=='shared_focus'){addF(v,S.all.shared_focus||(S.all.shared_focus=[]));got.add('shared_focus')}
+  if(k=='focus_tree'){const id=q(g(v,'id'))||base(name),arr=S.all[id]=[];all(v,'focus').forEach(x=>addF(x,arr));got.add(id)}}
+ for(const t of got){const A=S.all[t];for(let n=0;n<20;n++)for(const f of A)if(f.rel){const p=A.find(o=>o.id==f.rel);if(!p)delete f.rel;else if(!p.rel){f.x+=p.x;f.y+=p.y;delete f.rel}}A.forEach(f=>delete f.rel);const mx=Math.min(0,...A.map(f=>f.x)),my=Math.min(0,...A.map(f=>f.y));A.forEach(f=>{f.x-=mx;f.y-=my})}
+ if(got.size)S.tree=[...got][0];
+ 
+ }
+async function srcOf(n){
+ if(!n)return null;if(cache.has(n))return cache.get(n);
+ const file=files.get(gfx.get(n)||n.replace(/^GFX_/i,'').toLowerCase())||files.get(n.toLowerCase());
+ let u=null;
+ if(file)try{u=/\.dds$/i.test(file.name)?dds(await file.arrayBuffer()):URL.createObjectURL(file)}catch(e){}
+ cache.set(n,u);return u}
+function dds(buf){
+ const d=new DataView(buf),u8=new Uint8Array(buf),h=d.getUint32(12,true),w=d.getUint32(16,true);
+ let fc=String.fromCharCode(...u8.slice(84,88)),off=128,rgba=false;
+ if(fc=='DX10'){const m=d.getUint32(128,true);off=148;fc={71:'DXT1',72:'DXT1',74:'DXT3',75:'DXT3',77:'DXT5',78:'DXT5',28:'RAW',29:'RAW'}[m]||'RAW';rgba=m==28||m==29}
+ const o=new Uint8ClampedArray(w*h*4);
+ if(!/^DXT/.test(fc)){const bp=(d.getUint32(88,true)||32)/8;for(let i=0;i<w*h;i++){const p=off+i*bp;let r=u8[p+2],gg=u8[p+1],b=u8[p];if(rgba){[r,b]=[b,r]}o[i*4]=r;o[i*4+1]=gg;o[i*4+2]=b;o[i*4+3]=bp==4?u8[p+3]:255}}
+ else{const bs=fc=='DXT1'?8:16,bw=Math.ceil(w/4),bh=Math.ceil(h/4);
+  const col=c=>[(c>>11&31)*255/31,(c>>5&63)*255/63,(c&31)*255/31];
+  for(let by=0;by<bh;by++)for(let bx=0;bx<bw;bx++){
+   const a=off+(by*bw+bx)*bs,cp=bs==8?a:a+8,c0=d.getUint16(cp,true),c1=d.getUint16(cp+2,true),A=col(c0),B=col(c1);
+   const P=[A,B];
+   if(c0>c1||bs==16){P.push(A.map((v,i)=>(2*v+B[i])/3),A.map((v,i)=>(v+2*B[i])/3))}else{P.push(A.map((v,i)=>(v+B[i])/2),[0,0,0])}
+   const bits=d.getUint32(cp+4,true);let al=null;
+   if(fc=='DXT5'){const a0=u8[a],a1=u8[a+1],lo=d.getUint32(a+2,true),hi=d.getUint16(a+6,true),T=[a0,a1];
+    for(let k=2;k<8;k++)T.push(a0>a1?((8-k)*a0+(k-1)*a1)/7:k<6?((6-k)*a0+(k-1)*a1)/5:k==6?0:255);
+    al=i=>{const s=3*i;return T[(s+3<=32?lo>>>s:s>=32?hi>>(s-32):(lo>>>30)|(hi<<2))&7]}}
+   else if(fc=='DXT3')al=i=>(u8[a+(i>>1)]>>((i&1)*4)&15)*17;
+   for(let i=0;i<16;i++){const x=bx*4+(i&3),y=by*4+(i>>2);if(x>=w||y>=h)continue;
+    const ci=bits>>>(i*2)&3,c=P[ci],p=(y*w+x)*4;o[p]=c[0];o[p+1]=c[1];o[p+2]=c[2];
+    o[p+3]=al?al(i):(fc=='DXT1'&&c0<=c1&&ci==3?0:255)}}}
+ const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').putImageData(new ImageData(o,w,h),0,0);return cv.toDataURL()}
+function pos(d,f){d.style.left=PX+f.x*CW+8+'px';d.style.top=PY+f.y*CH+'px'}
+function render(){
+ const st=$('#stats');if(st)st.textContent=S.f.length+' фокусов';
+ const w=$('#world'),mx=Math.max(0,...S.f.map(f=>f.x))+2,my=Math.max(0,...S.f.map(f=>f.y))+2;
+ w.style.width=PX*2+mx*CW+'px';w.style.height=PY*2+my*CH+'px';w.innerHTML='<svg id="ln"></svg>';if(!S.f.length)w.insertAdjacentHTML('beforeend','<div class="empty">Ветка пуста.<br>Нажми «+ Фокус» или импортируй файлы фокусов из игры.</div>');
+ for(const f of S.f){const d=document.createElement('div');d.className='f'+(f===sel?' sel':'');d.dataset.i=S.f.indexOf(f);pos(d,f);
+  d.innerHTML='<div class="ic"></div><div class="lab"></div><div class="cs"></div><i class="pt" title="Потяни к фокусу, который идёт ПОСЛЕ этого (Shift — «ИЛИ»)"></i><i class="px" title="Потяни к фокусу, чтобы сделать выбор между ними"></i>';d.children[1].textContent=f.name||f.id;d.children[2].textContent=f.cost;w.appendChild(d);
+  (f.img?Promise.resolve(f.img):srcOf(f.icon)).then(u=>{if(u){d.firstChild.style.backgroundImage=`url(${u})`;d.firstChild.classList.add('has')}})}
+ lines()}
+function lines(){
+ const m=new Map(S.f.map(f=>[f.id,f])),C=f=>PX+f.x*CW+CW/2,T=f=>PY+f.y*CH,B=f=>T(f)+118;let h='';
+ for(const f of S.f){
+  for(const grp of f.pre.split(',')){const ids=grp.split('|').map(s=>s.trim()).filter(Boolean);
+   for(const id of ids){const p=m.get(id);if(!p)continue;const ym=T(f)-14;
+    h+=`<path d="M${C(p)} ${B(p)}V${ym}H${C(f)}V${T(f)}" fill="none" stroke="${ids.length>1?'#7fb0d6':'#b9a766'}" stroke-width="2.5" ${ids.length>1?'stroke-dasharray="7 4"':''}/>`}}
+  for(const id of f.ex.split(',').map(s=>s.trim()).filter(Boolean)){const p=m.get(id);if(!p||id<f.id)continue;
+   const x1=C(f),x2=C(p),y1=T(f)+40,y2=T(p)+40;
+   h+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#c0463a" stroke-width="2.5"/><circle cx="${(x1+x2)/2}" cy="${(y1+y2)/2}" r="9" fill="#14181b" stroke="#c0463a" stroke-width="2"/><text x="${(x1+x2)/2}" y="${(y1+y2)/2+5}" fill="#c0463a" font-size="14" text-anchor="middle">×</text>`}}
+ $('#ln').innerHTML=h}
+function fill(){$('#form').style.display=sel?'':'none';$('#none').style.display=sel?'none':'';
+ if(sel)document.querySelectorAll('[data-k]').forEach(i=>i.value=sel[i.dataset.k]??'')}
+function select(f){sel=f;setMode(null);fill();document.querySelectorAll('.f').forEach(d=>d.classList.toggle('sel',S.f[+d.dataset.i]===f))}
+document.querySelectorAll('[data-k]').forEach(i=>i.addEventListener('input',()=>{
+ if(!sel)return;const k=i.dataset.k;let v=i.value;if(k=='id'){const dup=S.f.some(o=>o!==sel&&o.id==v);i.style.borderColor=dup?'var(--rd)':'';if(dup||!v)return}
+ if(k=='id'){const old=sel.id,fx=s=>s.split(/([,|])/).map(t=>t.trim()==old?v:t).join('');S.f.forEach(f=>{f.pre=fx(f.pre);f.ex=fx(f.ex)})}
+ sel[k]=['x','y','cost'].includes(k)?Math.max(0,+v||0):v;render();save()}));
+let drag=null;
+$('#world').addEventListener('pointerdown',e=>{const d=e.target.closest('.f'),h=e.target.closest('.pt,.px');if(d&&h){lk={f:S.f[+d.dataset.i],t:h.classList.contains('px')?'ex':'pre'};e.preventDefault();return}if(!d){select(null);return}
+ const f=S.f[+d.dataset.i];if(mode&&sel&&f!==sel){link(f);e.preventDefault();return}select(f);drag={f,d,sx:e.clientX,sy:e.clientY,ox:f.x,oy:f.y};e.preventDefault()});
+addEventListener('pointermove',e=>{if(lk){const r=$('#world').getBoundingClientRect(),a=lk.f,x1=PX+a.x*CW+CW/2,y1=lk.t=='ex'?PY+a.y*CH+42:PY+a.y*CH+118;let p=$('#tl');if(!p){p=document.createElementNS('http://www.w3.org/2000/svg','path');p.id='tl';$('#ln').appendChild(p)}p.setAttribute('d',`M${x1} ${y1}L${e.clientX-r.left} ${e.clientY-r.top}`);p.setAttribute('style','fill:none;stroke:'+(lk.t=='ex'?'#c0463a':'#a855f7')+';stroke-width:5;stroke-linecap:round');return}if(!drag)return;const{f,d}=drag,nx=Math.max(0,drag.ox+Math.round((e.clientX-drag.sx)/CW)),ny=Math.max(0,drag.oy+Math.round((e.clientY-drag.sy)/CH));
+ if((nx!=f.x||ny!=f.y)&&!S.f.some(o=>o!==f&&o.x==nx&&o.y==ny)){f.x=nx;f.y=ny;pos(d,f);lines();fill()}});
+addEventListener('pointerup',up);addEventListener('pointercancel',up);function up(e){if(lk){const t=document.elementFromPoint(e.clientX,e.clientY)?.closest('.f'),b=t&&S.f[+t.dataset.i],a=lk.f,ty=lk.t;lk=null;if(b&&b!==a)connect(a,b,ty,e.shiftKey);else render();return}if(drag){drag=null;render();save()}}
+addEventListener('keydown',e=>{if(e.key=='Delete'&&sel&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName))$('#del').click()});
+$('#add').onclick=()=>{let n=S.f.length+1,id='FOCUS_'+n;while(S.f.some(f=>f.id===id))id='FOCUS_'+(++n);
+ let px=sel?sel.x:0,py=sel?sel.y+1:0;while(S.f.some(o=>o.x==px&&o.y==py))sel?py++:px++;const f={id,name:'',desc:'',icon:'',img:'',x:px,y:py,cost:10,pre:sel?sel.id:'',ex:''};S.f.push(f);trees();render();select(f);save()};
+$('#del').onclick=()=>{if(!sel)return;const id=sel.id,fx=s=>s.split(/([,|])/).filter(t=>t.trim()!=id).join('').replace(/^[,|]+|[,|]+$/g,'').replace(/[,|]{2,}/g,',');
+ S.f=S.f.filter(f=>f!=sel);S.f.forEach(f=>{f.pre=fx(f.pre);f.ex=fx(f.ex)});sel=null;trees();render();fill();save()};
+function trees(){S.f;const t=$('#ts');t.innerHTML='';Object.keys(S.all).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k+' ('+S.all[k].length+')';t.appendChild(o)});t.value=S.tree;$('#tree').value=S.tree}
+$('#ts').onchange=e=>{S.tree=e.target.value;select(null);trees();render();save()};
+$('#tree').oninput=e=>{const v=e.target.value.trim();if(!v||S.all[v])return;S.all[v]=S.all[S.tree];delete S.all[S.tree];S.tree=v;const o=$('#ts').selectedOptions[0];if(o){o.value=v;o.textContent=v+' ('+S.f.length+')'}save()};
+async function load(list){
+ for(const f of [...list]){const ext=(f.name.match(/\.(\w+)$/)||[])[1]?.toLowerCase();
+  if(ext=='txt'||ext=='gfx')importText(await f.text(),f.name);else if(['dds','png','tga','jpg'].includes(ext))files.set(base(f.name),f)}
+ cache.clear();trees();select(null);render();pick();save()}
+$('#imp').onchange=$('#fold').onchange=async e=>{await load(e.target.files);e.target.value=''};
+function pick(){
+ const qs=$('#isq').value.toLowerCase(),box=$('#ig');box.innerHTML='';
+ let names=gfx.size?[...gfx.keys()].filter(n=>files.has(gfx.get(n))):[...files.keys()].map(b=>'GFX_'+b);
+ $('#ih').style.display=names.length?'none':'';
+ for(const n of names.filter(n=>n.toLowerCase().includes(qs)).slice(0,80)){const t=document.createElement('div');t.title=n;
+  srcOf(n).then(u=>{if(u)t.style.backgroundImage=`url(${u})`});
+  t.onclick=async()=>{if(!sel)return;const target=sel;target.icon=n;target.img='';fill();render();save();try{const u=await srcOf(n);if(u&&S.f.includes(target)){target.img=await thumbnail(u);render();save()}}catch(e){}};box.appendChild(t)}}
+$('#isq').oninput=pick;
+$('#own').onchange=async e=>{const fl=e.target.files[0],target=sel;e.target.value='';if(!fl||!target)return;try{const data=await thumbnail(URL.createObjectURL(fl));target.img=data;target.icon='GFX_custom_'+target.id;render();fill();save()}catch(err){alert('Не удалось обработать картинку: '+err.message)}};
+function thumbnail(url){return new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{try{const c=document.createElement('canvas');c.width=128;c.height=128;const ctx=c.getContext('2d');ctx.drawImage(im,0,0,128,128);resolve(c.toDataURL('image/webp',.81))}catch(e){reject(e)}};im.onerror=()=>{reject(Error('Ошибка изображения'))};im.src=url})}
+function downloadBlob(blob,filename){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000)}
+const grp=s=>s.split(',').map(g=>g.split('|').map(x=>x.trim()).filter(Boolean)).filter(g=>g.length);
+function hoi(){let o=`focus_tree = {\n\tid = ${S.tree}\n\tcountry = {\n\t\tfactor = 0\n\t\tmodifier = { add = 10 tag = ${window.hoi4Tag||'TAG'} }\n\t}\n\tdefault = no\n\n`;
+ for(const f of S.f){o+=`\tfocus = {\n\t\tid = ${f.id}\n\t\ticon = ${f.icon||(f.img?'GFX_custom_'+f.id:'GFX_goal_unknown')}\n\t\tx = ${f.x}\n\t\ty = ${f.y}\n\t\tcost = ${f.cost}\n`;
+  grp(f.pre).forEach(g=>o+=`\t\tprerequisite = { ${g.map(i=>'focus = '+i).join(' ')} }\n`);
+  const ex=grp(f.ex.replace(/,/g,'|'))[0];if(ex)o+=`\t\tmutually_exclusive = { ${ex.map(i=>'focus = '+i).join(' ')} }\n`;
+  o+=`\t\tcompletion_reward = {\n\t\t}\n\t}\n\n`}return o+'}\n'}
+const escapeLoc = t => String(t??'').replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\r?\n/g,'\\n');
+const loc = () => 'l_russian:\n'+S.f.map(f=>` ${f.id}:0 "${escapeLoc(f.name||f.id)}"\n ${f.id}_desc:0 "${escapeLoc(f.desc)}"`).join('\n')+'\n';
+function ai(){
+ const W=14,mx=Math.max(0,...S.f.map(f=>f.x)),my=Math.max(0,...S.f.map(f=>f.y));
+ let o=`HOI4 focus tree "${S.tree}".\nCOORDINATES: x = column (0 = left, grows right), y = row (0 = top, grows down) — same as x/y in the game script. Focuses are drawn on this grid; the tree reads top to bottom.\nREQUIRES syntax: "A|B, C" = (A OR B) AND C. A focus is connected by a line from each of its prerequisites down to itself. "exclusive" = mutually exclusive focuses (red × line between them).\n\n== GRID MAP ==\n`;
+ o+='     '+Array.from({length:mx+1},(_,x)=>('x'+x).padEnd(W)).join(' ')+'\n';
+ for(let y=0;y<=my;y++)o+=('y'+y).padEnd(5)+Array.from({length:mx+1},(_,x)=>{const f=S.f.find(a=>a.x==x&&a.y==y);return (f?f.id.slice(0,W-1):'.').padEnd(W)}).join(' ')+'\n';
+ o+='\n== FOCUSES ==\n'+S.f.map(f=>`${f.id} | "${f.name||f.id}" | x=${f.x} y=${f.y} | cost=${f.cost} | requires: ${f.pre||'-'} | exclusive: ${f.ex||'-'} | icon: ${f.img?'custom image':f.icon||'-'}${f.desc?' | desc: '+f.desc:''}`).join('\n');
+ return o+'\n\n== JSON ==\n'+JSON.stringify({tree:S.tree,focuses:S.f.map(({img,...r})=>r)})}
+let exportFormat='hoi';
+document.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{exportFormat=b.dataset.x;$('#ot').value={hoi,ai,loc}[exportFormat]();$('#out').style.display='flex'});
+$('#exportFile').onclick=()=>{const base=(S.tree||'focus_tree').replace(/[^a-zA-Z0-9_-]/g,'_');const names={hoi:base+'.txt',ai:base+'_for_AI.txt',loc:base+'_l_russian.yml'};const content=(exportFormat==='loc'?'\uFEFF':'')+$('#ot').value;downloadBlob(new Blob([content],{type:'text/plain;charset=utf-8'}),names[exportFormat])};
+$('#cl').onclick=()=>$('#out').style.display='none';
+$('#cp').onclick=async()=>{const t=$('#ot');try{await navigator.clipboard.writeText(t.value)}catch(e){t.select();document.execCommand('copy')}$('#cp').textContent='Скопировано ✓';setTimeout(()=>$('#cp').textContent='Копировать',1500)};
+const TR={а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'};
+const slug=s=>[...s.toLowerCase()].map(c=>TR[c]??c).join('').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,40)||'focus';
+function fromText(txt,excl){
+ const rows=[],DT=/[—–─]|-{2,}/,DG=/[—–─][—–─-]*|-{2,}/g;let title='',rule=false,bA=false,note=null,first=true;
+ for(const raw of txt.replace(/\t/g,'    ').split('\n')){
+  const s=raw.trimEnd();if(!s.trim())continue;
+  if(first&&/^\s*(ветка|дерево|tree)/i.test(s)){title=s.trim();first=false;continue}first=false;
+  const nm=s.match(/^\s*\(\s*(?:возьми|взять|бери)\s+(?:из|от)\s+(.+?)\s*\)\s*$/i);
+  if(nm){note={r:rows.length-1,q:nm[1].toLowerCase()};continue}
+  if(!s.replace(/[|—–─_\s-]/g,'')){if(DT.test(s)){rule=true;bA=s.includes('|')}else if(rule)bA=true;continue}
+  const t=s.replace(/\|/g,' '),bars=[...t.matchAll(DG)].map(m=>({bar:1,c:m.index+m[0].length/2})),u=t.replace(DG,x=>' '.repeat(x.length)),
+   it=[...u.matchAll(/\S+(?: \S+)*/g)].map(m=>({n:m[0],c:m.index+m[0].length/2}));
+  if(!it.length)continue;
+  rows.push({its:it.concat(bars).sort((a,b)=>a.c-b.c),rule,bA});rule=bA=false}
+ const F=[],near=(a,c)=>a.reduce((m,x)=>Math.abs(x.c-c)<Math.abs(m.c-c)?x:m);let lanes=[];
+ rows.forEach((r,ri)=>{const its=r.its,nl=[],merge=r.rule&&!r.bA&&lanes.length>its.length;
+  its.forEach((i,k)=>{let ps=[];
+   if(lanes.length)ps=merge?lanes.filter(l=>near(its,l.c)===i):lanes.length==its.length?[lanes[k]]:[near(lanes,i.c)];
+   if(merge&&!ps.length)ps=[near(lanes,i.c)];
+   if(i.bar){if(ps[0])nl.push({n:ps[0].n,c:i.c});return}
+   const f={name:i.n,par:ps.map(p=>p.n).filter((p,x,a)=>a.indexOf(p)==x),r:ri,ch:[],k:[]};F.push(f);nl.push({n:f,c:i.c})});
+  lanes=nl});
+ F.forEach(f=>f.par.forEach(p=>p.ch.push(f)));
+ if(note){const q=note.q,L=f=>f.name.toLowerCase(),t=F.find(f=>L(f).includes(q))||F.find(f=>q.split(' ').every(w=>L(f).includes(w)));
+  if(t){let e=t;while(e.ch.length==1)e=e.ch[0];F.filter(f=>f.r==note.r&&f!==e).forEach(f=>{f.par.forEach(p=>p.ch.splice(p.ch.indexOf(f),1));f.par=[e];e.ch.push(f)})}}
+ const used=new Set();F.forEach(f=>{let b=slug(f.name),id=b,n=2;while(used.has(id))id=b+'_'+n++;used.add(id);f.id=id});
+ F.forEach(f=>{f.y=f.par.length?Math.max(...f.par.map(p=>p.y))+1:0;if(f.par[0])f.par[0].k.push(f)});
+ let nx=0;const lay=f=>{if(!f.k.length){f.x=nx;nx+=2;return}f.k.forEach(lay);f.x=Math.round((f.k[0].x+f.k[f.k.length-1].x)/2)};
+ F.filter(f=>!f.par.length).forEach(lay);
+ const occ=new Set();F.slice().sort((a,b)=>a.y-b.y||a.x-b.x).forEach(f=>{while(occ.has(f.x+','+f.y))f.x+=2;occ.add(f.x+','+f.y)});
+ const mn=Math.min(0,...F.map(f=>f.x));
+ F.forEach(f=>{f.pre=f.par.map(p=>p.id).join('|');f.ex=excl&&f.par.length==1?f.par[0].ch.filter(o=>o!==f&&o.par.length==1).map(o=>o.id).join(', '):''});
+ return{title,arr:F.map(f=>({id:f.id,name:f.name,desc:'',icon:'',img:'',x:f.x-mn,y:f.y,cost:10,pre:f.pre,ex:f.ex}))}}
+let mode=null,lk=null;
+function connect(a,b,t,or){
+ if(t=='ex'){if(has(a.ex,b.id)){a.ex=rm(a.ex,b.id);b.ex=rm(b.ex,a.id)}else{a.ex=a.ex?a.ex+', '+b.id:b.id;if(!has(b.ex,a.id))b.ex=b.ex?b.ex+', '+a.id:a.id}}
+ else if(has(b.pre,a.id))b.pre=rm(b.pre,a.id);
+ else b.pre=!b.pre?a.id:or?b.pre+'|'+a.id:b.pre+', '+a.id;
+ render();fill();save()}
+function setMode(m){mode=sel?m:null;$('#mh').textContent=mode?'Кликни фокус на ветке, чтобы связать. Повторный клик по связанному — убрать связь. Esc или клик по пустому месту — готово.':'';$('#cv').style.cursor=mode?'crosshair':''}
+const has=(s,id)=>s.split(/[,|]/).some(x=>x.trim()==id),rm=(s,id)=>s.split(',').map(g=>g.split('|').map(x=>x.trim()).filter(x=>x&&x!=id).join('|')).filter(Boolean).join(', ');
+function link(f){
+ if(mode=='ex'){if(has(sel.ex,f.id)){sel.ex=rm(sel.ex,f.id);f.ex=rm(f.ex,sel.id)}else{sel.ex=sel.ex?sel.ex+', '+f.id:f.id;if(!has(f.ex,sel.id))f.ex=f.ex?f.ex+', '+sel.id:sel.id}}
+ else if(has(sel.pre,f.id))sel.pre=rm(sel.pre,f.id);
+ else sel.pre=!sel.pre?f.id:mode=='or'?sel.pre+'|'+f.id:sel.pre+', '+f.id;
+ fill();render();save()}
+$('#bp').onclick=()=>setMode('and');$('#bo').onclick=()=>setMode('or');$('#bx').onclick=()=>setMode('ex');
+addEventListener('keydown',e=>{if(e.key=='Escape')setMode(null)});
+const closeT=()=>$('#tin').style.display='none';
+$('#txt').onclick=()=>$('#tin').style.display='flex';$('#tc').onclick=closeT;
+$('#mk').onclick=()=>{const r=fromText($('#ti').value,$('#ex').checked);if(!r.arr.length)return;
+ let tid=slug(r.title.replace(/^\s*(ветка|дерево)\s+(фокусов\s+)?/i,'')||'text_tree').toUpperCase();while(S.all[tid])tid+='_2';
+ S.all[tid]=r.arr;S.tree=tid;select(null);trees();render();save();closeT()};
+trees();render();fill();pick();
+
+// Project persistence for GitHub Pages. No server, tokens or GitHub API required.
+(function(){
+ 'use strict';
+ const KEY='hoi4_focus_studio_projects_v4',ACTIVE='hoi4_focus_studio_active_v4';
+ const OLD_KEY='hoi4_focus_studio_projects_v3',OLD_ACTIVE='hoi4_focus_studio_active_v3';
+ const clone=x=>JSON.parse(JSON.stringify(x));
+ const uid=()=> 'project_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);
+ const now=()=>new Date().toISOString();
+ let projects=[],active='',undoStack=[],redoStack=[],lastState='',initialized=false,db=null;
+ let flushTimer=null,toastTimer=null,writeSequence=0;
+ const status=$('#saveState');
+ const notify=t=>{const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600)};
+ const safeJSON=s=>{try{return JSON.parse(s)}catch(e){return null}};
+ const getLocal=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+ const setLocal=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
+ const setStatus=(s,isError=false)=>{status.textContent=s;status.classList.toggle('err',isError)};
+ function normalize(data){
+   if(!data||typeof data!=='object'||typeof data.tree!=='string'||!data.tree||!data.all||typeof data.all!=='object'||Array.isArray(data.all))throw Error('Неверный формат проекта');
+   const all={};let count=0;
+   for(const [id,arr] of Object.entries(data.all)){
+     if(typeof id!=='string'||!Array.isArray(arr))continue;
+     all[id]=arr.filter(f=>f&&typeof f.id==='string').map(f=>({
+       id:f.id,name:String(f.name||''),desc:String(f.desc||''),icon:String(f.icon||''),img:typeof f.img==='string'?f.img:'',
+       x:Math.max(0,Number(f.x)||0),y:Math.max(0,Number(f.y)||0),cost:Math.max(0,Number(f.cost)||10),
+       pre:String(f.pre||''),ex:String(f.ex||'')
+     }));count+=all[id].length;if(count>15000)throw Error('Проект слишком большой');
+   }
+   if(!Object.prototype.hasOwnProperty.call(all,data.tree))all[data.tree]=[];
+   return {tree:data.tree,all};
+ }
+ function current(){return projects.find(p=>p.id===active)}
+ function data(){return clone(S.toJSON())}
+ function store(){if(!initialized)return;const p=current();if(!p)return;const fresh=data();const changed=JSON.stringify(p.data)!==JSON.stringify(fresh);if(changed){
+     const t=Date.now();if(p.lastAutoVersion&&t-p.lastAutoVersion>5*60*1000){p.versions=p.versions||[];p.versions.push({label:'Автоверсия',date:now(),data:clone(p.data)});p.versions=p.versions.slice(-25);p.lastAutoVersion=t;}
+     p.data=fresh;p.updated=now();
+   }
+   persist();
+ }
+ async function openDB(){
+   if(!('indexedDB' in window))return null;
+   return new Promise(resolve=>{let req;try{req=indexedDB.open('hoi4-focus-studio',1)}catch(e){resolve(null);return}
+     req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('data'))req.result.createObjectStore('data')};
+     req.onsuccess=()=>resolve(req.result);req.onerror=()=>resolve(null);req.onblocked=()=>resolve(null);
+   });
+ }
+ function readDB(){if(!db)return Promise.resolve(null);return new Promise(resolve=>{
+   try{const req=db.transaction('data','readonly').objectStore('data').get('workspace');req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>resolve(null)}catch(e){resolve(null)}
+ })}
+ function writeDB(payload){if(!db)return Promise.resolve(false);return new Promise(resolve=>{
+   try{const tx=db.transaction('data','readwrite');tx.objectStore('data').put(payload,'workspace');tx.oncomplete=()=>resolve(true);tx.onerror=()=>resolve(false);tx.onabort=()=>resolve(false)}catch(e){resolve(false)}
+ })}
+ function persist(){if(!initialized)return;setStatus('◌ Сохранение…');const next=++writeSequence;
+   clearTimeout(flushTimer);flushTimer=setTimeout(async()=>{
+     const payload={projects:clone(projects),active,updated:now()};
+     const lsOK=setLocal(KEY,JSON.stringify(payload.projects))&&setLocal(ACTIVE,active);
+     const idbOK=await writeDB(payload);
+     if(next!==writeSequence)return;
+     if(idbOK||lsOK)setStatus('● Автосохранено');else setStatus('⚠ Скачайте JSON',true);
+   },250);
+ }
+ function version(label){store();const p=current();if(!p)return;p.versions=p.versions||[];p.versions.push({label:label||'Контрольная версия',date:now(),data:data()});p.versions=p.versions.slice(-25);persist()}
+ function refresh(selectedId){sel=null;trees();render();fill();pick();if(selectedId){const f=S.f.find(f=>f.id===selectedId);if(f)select(f)}lastState=JSON.stringify(S.toJSON());undoStack=[];redoStack=[];applySearch();renderProjects();updateTitle();}
+ function updateTitle(){const p=current();document.title=(p?.name||'HOI4 Focus Studio')+' — HOI4 Focus Studio';$('#countryTag').value=p?.tag||'TAG';window.hoi4Tag=p?.tag||'TAG'}
+ function loadProject(id){if(id===active)return;store();const p=projects.find(p=>p.id===id);if(!p)return;active=id;S=mk(p.data.tree,clone(p.data.all));refresh();persist();notify('Открыт проект: '+p.name)}
+ function renderProjects(){const box=$('#plist');box.innerHTML='';
+   for(const p of projects){const el=document.createElement('div');el.className='project-item'+(p.id===active?' active':'');
+     const left=document.createElement('div'),name=document.createElement('strong'),meta=document.createElement('small');name.textContent=p.name;meta.textContent=Object.keys(p.data.all||{}).length+' веток · '+Object.values(p.data.all||{}).reduce((n,a)=>n+a.length,0)+' фокусов';left.append(name,meta);el.append(left);
+     if(p.id===active){const mark=document.createElement('small');mark.textContent='Открыт';el.append(mark)}el.onclick=()=>loadProject(p.id);box.append(el);
+   }
+   const p=current();$('#pname').value=p?.name||'';const container=$('#snaplist');container.innerHTML='';
+   for(const v of (p?.versions||[]).slice().reverse()){
+     const el=document.createElement('div');el.className='project-item';const t=document.createElement('span');t.textContent=v.label+' · '+new Date(v.date).toLocaleString('ru-RU');
+     const b=document.createElement('button');b.textContent='Восстановить';b.onclick=()=>{if(!confirm('Восстановить эту версию? Текущая будет сохранена отдельно.'))return;version('Перед восстановлением');const next=normalize(v.data);S=mk(next.tree,next.all);store();refresh();notify('Контрольная версия восстановлена')};el.append(t,b);container.append(el);
+   }
+ }
+ const oldSave=save;
+ save=function(){oldSave();if(initialized){const state=JSON.stringify(S.toJSON());if(state!==lastState){undoStack.push(lastState);if(undoStack.length>80)undoStack.shift();redoStack=[];lastState=state;}store()}};
+ function record(){if(!initialized)return;const state=JSON.stringify(S.toJSON());if(state!==lastState){undoStack.push(lastState);if(undoStack.length>80)undoStack.shift();redoStack=[];lastState=state;store()}}
+ // All editing operations call save() synchronously. No deferred history recording needed.
+ function restore(state){const id=sel?.id;const parsed=normalize(JSON.parse(state));S=mk(parsed.tree,parsed.all);store();refresh(id)}
+ $('#undo').onclick=()=>{if(!undoStack.length){notify('Нет действий для отмены');return}redoStack.push(JSON.stringify(S.toJSON()));const state=undoStack.pop();const prevUndo=undoStack.slice(),prevRedo=redoStack.slice();restore(state);undoStack=prevUndo;redoStack=prevRedo;notify('Действие отменено')};
+ $('#redo').onclick=()=>{if(!redoStack.length){notify('Нет действий для повтора');return}undoStack.push(JSON.stringify(S.toJSON()));const state=redoStack.pop();const prevRedo=redoStack.slice(),prevUndo=undoStack.slice();restore(state);redoStack=prevRedo;undoStack=prevUndo;notify('Действие повторено')};
+ $('#projects').onclick=()=>{$('#pm').classList.add('open');$('#pm').setAttribute('aria-hidden','false');renderProjects()};
+ $('#pmclose').onclick=()=>{$('#pm').classList.remove('open');$('#pm').setAttribute('aria-hidden','true')};
+ $('#pm').addEventListener('pointerdown',e=>{if(e.target===$('#pm'))$('#pmclose').click()});
+ $('#pname').onchange=e=>{const p=current();if(p){p.name=e.target.value.trim().slice(0,120)||'Без названия';persist();renderProjects();updateTitle()}};
+ $('#countryTag').oninput=e=>{const p=current();if(!p)return;const tag=e.target.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);e.target.value=tag;p.tag=tag||'TAG';window.hoi4Tag=p.tag;persist()};
+ $('#psave').onclick=()=>{store();notify('Сохранено на этом устройстве')};
+ $('#pnew').onclick=()=>{const name=prompt('Название нового проекта:','Новый HOI4 мод');if(name===null)return;store();const id=uid();projects.push({id,name:name.trim().slice(0,120)||'Новый проект',updated:now(),tag:'TAG',lastAutoVersion:Date.now(),data:{tree:'MY_FOCUS_TREE',all:{MY_FOCUS_TREE:[]}},versions:[]});active=id;S=mk('MY_FOCUS_TREE',{MY_FOCUS_TREE:[]});refresh();persist();notify('Новый проект создан')};
+ $('#pduplicate').onclick=()=>{store();const p=current();if(!p)return;const id=uid();projects.push({id,name:p.name+' (копия)',updated:now(),tag:p.tag||'TAG',lastAutoVersion:Date.now(),data:clone(p.data),versions:[]});active=id;S=mk(p.data.tree,clone(p.data.all));refresh();persist();notify('Проект скопирован')};
+ $('#pdelete').onclick=()=>{if(projects.length===1){notify('Последний проект нельзя удалить');return}if(!confirm('Удалить этот проект из браузера? Предварительно скачай резервную копию.'))return;projects=projects.filter(p=>p.id!==active);active=projects[0].id;S=mk(projects[0].data.tree,clone(projects[0].data.all));refresh();persist();notify('Проект удалён')};
+ $('#psnapshot').onclick=()=>{version('Версия '+new Date().toLocaleString('ru-RU'));renderProjects();notify('Версия создана')};
+ function download(){store();const p=current();if(!p)return;const obj={format:'HOI4-Focus-Studio',version:4,exported:now(),project:clone(p)};
+   const filename=(p.name.replace(/[^a-zа-яё0-9_-]+/gi,'_').slice(0,60)||'hoi4_focus')+'.json';downloadBlob(new Blob([JSON.stringify(obj,null,2)],{type:'application/json;charset=utf-8'}),filename);notify('JSON-копия скачана');
+ }
+ $('#pdownload').onclick=download;$('#quickBackup').onclick=download;
+ $('#pupload').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;try{const content=JSON.parse(await file.text());const imported=normalize(content.project?.data||content.data||content);store();
+   const id=uid(),name=String(content.project?.name||file.name.replace(/\.json$/i,'')).slice(0,120);const versions=Array.isArray(content.project?.versions)?content.project.versions.slice(-25).filter(v=>v&&v.data&&v.date):[];
+   projects.push({id,name,updated:now(),tag:content.project?.tag||'TAG',lastAutoVersion:Date.now(),data:imported,versions});active=id;S=mk(imported.tree,clone(imported.all));refresh();persist();notify('JSON успешно импортирован');
+ }catch(err){notify('Ошибка импорта: '+err.message)}};
+ const fs=$('#focusSearch');
+ function applySearch(){const v=fs.value.trim().toLowerCase();document.querySelectorAll('.f').forEach(el=>{const f=S.f[+el.dataset.i];const ok=!v||(f&&((f.name||'').toLowerCase().includes(v)||f.id.toLowerCase().includes(v)));el.classList.toggle('search-dim',Boolean(v)&&!ok);el.classList.toggle('search-match',Boolean(v)&&ok)})}
+ fs.addEventListener('input',applySearch);fs.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const matches=S.f.filter(f=>(f.name||'').toLowerCase().includes(fs.value.toLowerCase())||f.id.toLowerCase().includes(fs.value.toLowerCase()));if(matches.length){const f=matches[0];select(f);const el=Array.from(document.querySelectorAll('.f')).find(e=>S.f[+e.dataset.i]===f);el?.scrollIntoView({block:'center',inline:'center',behavior:'smooth'})}});
+ const nativeRender=render;render=function(){nativeRender();applySearch()};
+ document.addEventListener('keydown',e=>{const tag=document.activeElement?.tagName||'',typing=/INPUT|TEXTAREA/.test(tag);if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();download()}
+   else if((e.ctrlKey||e.metaKey)&&!typing&&e.key.toLowerCase()==='z'){e.preventDefault();$('#undo').click()}
+   else if((e.ctrlKey||e.metaKey)&&!typing&&(e.key.toLowerCase()==='y'||(e.shiftKey&&e.key.toLowerCase()==='z'))){e.preventDefault();$('#redo').click()}
+   else if(e.key==='Escape'&&$('#pm').classList.contains('open'))$('#pmclose').click();
+ });
+ async function init(){db=await openDB();const idb=await readDB();let stored=null;
+   if(Array.isArray(idb?.projects)&&idb.projects.length)stored=idb;
+   if(!stored){const list=safeJSON(getLocal(KEY))||safeJSON(getLocal(OLD_KEY));if(Array.isArray(list)&&list.length)stored={projects:list,active:getLocal(ACTIVE)||getLocal(OLD_ACTIVE)}};
+   if(stored){projects=stored.projects.filter(p=>p&&p.id&&p.data).map(p=>{try{return {...p,data:normalize(p.data),versions:Array.isArray(p.versions)?p.versions.slice(-25):[]}}catch(e){return null}}).filter(Boolean);
+     active=stored.active;}
+   if(!projects.length){active=uid();const initial=normalize(S.toJSON());projects=[{id:active,name:'Мой HOI4 проект',updated:now(),tag:'TAG',lastAutoVersion:Date.now(),data:initial,versions:[]}];}
+   if(!projects.some(p=>p.id===active))active=projects[0].id;
+   const p=current();S=mk(p.data.tree,clone(p.data.all));initialized=true;refresh();persist();
+ }
+ addEventListener('pagehide',()=>{if(initialized){const p=current();if(p)p.data=data();setLocal(KEY,JSON.stringify(projects));setLocal(ACTIVE,active);writeDB({projects:clone(projects),active,updated:now()})}});
+ setInterval(()=>{if(!initialized)return;const v=JSON.stringify(S.toJSON());if(v!==lastState)record();store()},15000);
+ init().catch(e=>{setStatus('Ошибка хранилища · скачай JSON',true);console.error(e)});
+})();
+// Optional offline caching for published GitHub Pages sites.
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
+
+</script></body></html>

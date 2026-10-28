@@ -1,0 +1,7 @@
+8f9e42c426f138e8fdc8fb08d78928ccce1f1228c189146ca1f1f31dd5791376  HOI4-Focus-Studio-Setup.exe
+c2663c8a3384608e1dad08dc15d92710645afb517cc432ac5b04129c1401e592  HOI4-Focus-Studio.exe
+a787d1bb1bbc7c081a41497527af96e64e4a3250b6c5e7d911e7ad7460c8f946  HOI4-Focus-Studio-macOS-universal.zip
+275b9522664243cc555d4728fe874dc1677045855c50edbc25cad1243b4f856e  HOI4-Focus-Studio-linux-amd64.deb
+e667fab6e44fb2359a877774d6e1ebcb43533cffd7a80735073d84ac64e0be8d  HOI4-Focus-Studio-linux-amd64-portable.tar.gz
+d2b086e502a7456e58ae97f0bc1b4eb96e8bbfb46cff78542576f6e3f1dfc872  HOI4-Focus-Studio-linux-arm64.deb
+830cdb87f4c7520f38ec4eaaab48037bdff2801ddc6df7f533accf8e826761ec  HOI4-Focus-Studio-linux-arm64-portable.tar.gz

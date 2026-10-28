@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=HOI4 Focus Studio
+GenericName=HOI4 National Focus Editor
+Comment=Create and export national focus trees for Hearts of Iron IV
+Exec=hoi4-focus-studio
+Icon=hoi4-focus-studio
+Terminal=false
+Categories=Graphics;Development;
+StartupNotify=false
+Keywords=hoi4;hearts of iron;focus;modding;

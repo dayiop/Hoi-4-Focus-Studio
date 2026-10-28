@@ -1,0 +1,12 @@
+{
+  "name": "HOI4 Focus Studio",
+  "short_name": "Focus Studio",
+  "description": "Редактор национальных фокусов HOI4 с локальными сохранениями",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c1013",
+  "theme_color": "#151b20",
+  "icons": [{"src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}]
+}
