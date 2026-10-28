@@ -8,8 +8,6 @@ GitHub Pages · Windows · macOS · Linux · Автосохранение · JSO
 
 **Полная поставка:** [Как загрузить на GitHub и оформить Releases](GITHUB_PUBLISHING.md) · [Готовые сборки для всех ОС](release-files/)
 
-![Предпросмотр редактора](preview.png)
-
 </div>
 
 ## 🗺️ Что это за проект
